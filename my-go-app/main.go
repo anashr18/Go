@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -21,6 +23,14 @@ var recipes []Recipe
 
 func init() {
 	recipes = make([]Recipe, 0)
+	file, _ := os.ReadFile("recipes.json")
+	_ = json.Unmarshal([]byte(file), &recipes)
+}
+
+func ListRecipeHandler(c *gin.Context) {
+	c.JSON(200, gin.H{
+		"recipes": recipes,
+	})
 }
 
 func IndexHandler(c *gin.Context) {
@@ -52,27 +62,6 @@ func NewRecipeHandler(c *gin.Context) {
 func main() {
 	router := gin.Default()
 	router.POST("/recipes", NewRecipeHandler)
+	router.GET("/recipes", ListRecipeHandler)
 	router.Run(":8080")
 }
-
-// func main() {
-// 	router := gin.Default()
-// 	router.GET("/:name", IndexHandler)
-// 	router.Run(":8080")
-// }
-
-// {
-// 	"name": "Homemade Pizza",
-// 	"tags" : ["italian", "pizza", "dinner"],
-// 	"ingredients": [
-// 	"1 1/2 cups (355 ml) warm water (105°F-115°F)",
-// 	"1 package (2 1/4 teaspoons) of active dry yeast",
-// 	"3 3/4 cups (490 g) bread flour",
-// 	"feta cheese, firm mozzarella cheese, grated"
-// 	],
-// 	"instructions": [
-// 		"Step 1.",
-// 	"Step 2.",
-// 	"Step 3."
-// 	]
-// }
