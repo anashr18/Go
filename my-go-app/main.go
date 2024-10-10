@@ -59,9 +59,27 @@ func NewRecipeHandler(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"status": "success", "message": "Recipe added successfully", "recipe": recipe})
 }
 
+func UpdateRecipeHandler(c *gin.Context) {
+	id := c.Param("id")
+	var updatedRecipe Recipe
+	if err := c.ShouldBindJSON(&updatedRecipe); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	for i, r := range recipes {
+		if r.ID == id {
+			recipes[i] = updatedRecipe
+			c.JSON(http.StatusOK, gin.H{"status": "success", "message": "Recipe updated successfully", "recipe": updatedRecipe})
+			return
+		}
+	}
+	c.JSON(http.StatusNotFound, gin.H{"error": "Recipe not found"})
+}
+
 func main() {
 	router := gin.Default()
 	router.POST("/recipes", NewRecipeHandler)
 	router.GET("/recipes", ListRecipeHandler)
-	router.Run(":8080")
+	router.PUT("/recipes/:id", UpdateRecipeHandler)
+	router.Run(":8000")
 }
