@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -102,11 +103,26 @@ func DeleteRecipeHandler(c *gin.Context) {
 		"message": "recipe has been deleted", "deletedRecipeName": deletedRecipeName})
 }
 
+func SearchRecipeHandler(c *gin.Context) {
+	query := c.Query("tag")
+	results := make([]Recipe, 0)
+	for _, recipe := range recipes {
+		for _, tag := range recipe.Tags {
+			if strings.Contains(strings.ToLower(tag), strings.ToLower(query)) {
+				results = append(results, recipe)
+				break
+			}
+		}
+	}
+	c.JSON(200, gin.H{"results": results})
+}
+
 func main() {
 	router := gin.Default()
 	router.POST("/recipes", NewRecipeHandler)
 	router.GET("/recipes", ListRecipeHandler)
 	router.PUT("/recipes/:id", UpdateRecipeHandler)
 	router.DELETE("/recipes/:id", DeleteRecipeHandler)
+	router.GET("/recipes/search", SearchRecipeHandler)
 	router.Run(":8000")
 }
