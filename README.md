@@ -51,6 +51,18 @@ go main.go state.go
 | Reading from terminal input | `os.Stdin`            | N/A            | `input()`                 | N/A                        | `std::cin`                       | N/A                              |
 | Network connection (TCP)    | `net.Conn`            | `net.Conn`     | `socket.socket().recv()`  | `socket.socket().send()`   | **`boost::asio`** or **sockets** | **`boost::asio`** or **sockets** |
 
+## Why Channels Can Be Slower Than Mutexes
+Blocking Nature:
+
+Each goroutine must wait for a send or receive to complete before proceeding. If multiple goroutines try to update a shared value via a channel, only one can access the value at a time, causing others to wait.
+This serialization ensures safety, but it can become a bottleneck when you have high concurrency (many goroutines competing for access).
+Overhead of Communication:
+
+Passing data through channels involves communication overhead because the data must be passed back and forth between goroutines.
+This can be slower than using a mutex, where the data remains in-place and only access is coordinated.
+Goroutine Scheduling:
+
+When a goroutine sends or receives from a channel, it may block and be put to sleep by the Go scheduler, only to be rescheduled later. This scheduling overhead can add latency compared to the simple locking mechanism of a mutex.
 
 ## Use fresh for hotloading
 ``go install github.com/pilu/fresh@latest``
